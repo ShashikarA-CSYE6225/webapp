@@ -11,7 +11,11 @@ public interface UserService {
 
     public List<UserDto> getAllUsers();
 
-    public UserDto updateUser(String UserId, User user);
+    public UserDto updateUser(String userName, User requestBody);
 
     public Optional<UserDto> findByUserNameAndPassword(String userName, String password);
+
+    public Optional<User> findByUserName(String userName);
+
+    public UserDto mapToDto(User user);
 }
