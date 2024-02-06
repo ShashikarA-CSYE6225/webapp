@@ -1,21 +1,24 @@
 package com.csye6225.webapp.service;
 
-import com.csye6225.webapp.dto.UserDto;
+import com.csye6225.webapp.dto.UserResponseDto;
+import com.csye6225.webapp.exception.IncorrectPasswordException;
+import com.csye6225.webapp.exception.UserNotFoundException;
+import com.csye6225.webapp.exception.UsernameAlreadyExistsException;
 import com.csye6225.webapp.model.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    public UserDto createUser(User user);
+    public UserResponseDto createUser(User user) throws UsernameAlreadyExistsException;
 
-    public List<UserDto> getAllUsers();
+    public List<UserResponseDto> getAllUsers();
 
-    public UserDto updateUser(String userName, User requestBody);
+    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException;
 
-    public Optional<UserDto> findByUserNameAndPassword(String userName, String password);
+    public Optional<UserResponseDto> findByUserNameAndPassword(String userName, String password);
 
-    public Optional<User> findByUserName(String userName);
+    public UserResponseDto getUser(User requestBody, String userName) throws UserNotFoundException, IncorrectPasswordException;
 
-    public UserDto mapToDto(User user);
+    public UserResponseDto mapToDto(User user);
 }
