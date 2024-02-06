@@ -1,12 +1,15 @@
 package com.csye6225.webapp.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 
 @Data
 @Builder
@@ -20,22 +23,29 @@ public class User {
     private String id;
 
     @Column(name = "first_name", nullable = false)
+    @JsonProperty("first_name")
     private String firstName;
 
     @Column(name = "last_name", nullable = false)
+    @JsonProperty("last_name")
     private String lastName;
 
     @Column(name = "username", nullable = false)
+    @JsonProperty("username")
+    @Email(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,3}")
     private String userName;
 
     @Column(name = "password", nullable = false)
+    @JsonProperty("password")
     private String password;
 
     @Column(name = "account_updated")
     @UpdateTimestamp
+    @JsonProperty("account_updated")
     private String accountUpdated;
 
     @Column(name = "account_created")
     @CreationTimestamp
+    @JsonProperty("account_created")
     private String accountCreated;
 }
