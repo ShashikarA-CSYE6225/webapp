@@ -25,8 +25,8 @@ public class HealthCheckController {
         headers.setPragma("no-cache");
         headers.add("X-Content-Type-Options", "nosniff");
 
-        if((queryParams != null && !queryParams.isEmpty()) ||
-                (requestBody != null && !requestBody.isEmpty()))
+        if((null != queryParams && !queryParams.isEmpty()) ||
+                (null != requestBody && !requestBody.isEmpty()))
         {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)

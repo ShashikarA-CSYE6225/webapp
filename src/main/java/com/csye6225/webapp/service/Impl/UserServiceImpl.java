@@ -5,6 +5,8 @@ import com.csye6225.webapp.model.User;
 import com.csye6225.webapp.repository.UserRepository;
 import com.csye6225.webapp.service.UserService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,13 +34,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(String userId, User newUser) {
-        User existingUserResponse = userRepository.findById(userId).get();
-        existingUserResponse.setFirstName(newUser.getFirstName());
-        existingUserResponse.setLastName(newUser.getLastName());
-        existingUserResponse.setUserName(newUser.getUserName());
-        existingUserResponse.setPassword(newUser.getPassword());
-        return mapToDto(existingUserResponse);
+    public UserDto updateUser(String userName, User requestBody) {
+        Optional<User> existingUserOptional = userRepository.findByUserName(userName);
+
+        if (existingUserOptional.isPresent()) {
+            User existingUserResponse = existingUserOptional.get();
+            existingUserResponse.setFirstName(requestBody.getFirstName());
+            existingUserResponse.setLastName(requestBody.getLastName());
+
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            String hashedPassword = passwordEncoder.encode(requestBody.getPassword());
+            existingUserResponse.setPassword(hashedPassword);
+
+            return mapToDto(userRepository.save(existingUserResponse));
+        }
+
+        return null;
     }
 
     @Override
@@ -46,14 +57,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUserNameAndPassword(userName, password).map(this::mapToDto);
     }
 
-    private UserDto mapToDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .userName(user.getUserName())
-                .accountCreated(user.getAccountCreated())
-                .accountUpdated(user.getAccountUpdated())
-                .build();
+    @Override
+    public Optional<User> findByUserName(String userName) {
+        return userRepository.findByUserName(userName);
+    }
+    @Override
+    public UserDto mapToDto(User user) {
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(user, UserDto.class);
     }
 }
