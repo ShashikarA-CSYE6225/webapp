@@ -2,7 +2,7 @@
 
 ## Overview
 
-This web application provides a RESTful API for managing user accounts. Users can create an account, update their information, and retrieve their account details using the provided API endpoints. The application also supports token-based authentication to ensure secure access to user data.
+This web application provides a RESTful APIs for managing user accounts. Users can create an account, update their information, and retrieve their account details using the provided API endpoints. The application also supports token-based authentication to ensure secure access to user data.
 
 ## Requirements
 
