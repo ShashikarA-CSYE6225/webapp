@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createUser(@RequestBody User user, @RequestHeader(value = "Authorization", required = false) String auth) throws UsernameAlreadyExistsException, InvalidAuthorizationException {
+    public ResponseEntity<Object> createUser(@RequestBody User user, @RequestHeader(value = "Authorization", required = false) String auth) throws UsernameAlreadyExistsException{
         UserResponseDto userResponse = userService.createUser(user, auth);
 
         return ResponseEntity
@@ -68,15 +68,7 @@ public class UserController {
                 .build();
     }
 
-    @RequestMapping(method = {RequestMethod.HEAD, RequestMethod.OPTIONS})
-    public ResponseEntity<Void> handleHeadAndOptionsMethods() {
-        return ResponseEntity
-                .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .headers(headers)
-                .build();
-    }
-
-    @RequestMapping(path = "/self", method = {RequestMethod.HEAD, RequestMethod.OPTIONS})
+    @RequestMapping(path = {"","/self"}, method = {RequestMethod.HEAD, RequestMethod.OPTIONS})
     public ResponseEntity<Void> handleSelfHeadAndOptionsMethods() {
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)

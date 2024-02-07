@@ -24,10 +24,10 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Override
-    public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException, InvalidAuthorizationException {
+    public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException {
         if(null != auth && !auth.isEmpty())
         {
-            throw new InvalidAuthorizationException();
+            throw new IllegalArgumentException();
         }
 
         validateUserForCreation(user);

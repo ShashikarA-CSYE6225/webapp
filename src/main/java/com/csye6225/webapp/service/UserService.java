@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException, InvalidAuthorizationException;
+    public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException;
 
     public List<UserResponseDto> getAllUsers();
 
