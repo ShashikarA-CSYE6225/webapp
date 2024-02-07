@@ -32,6 +32,11 @@ public class UserServiceImpl implements UserService {
 
         validateUserForCreation(user);
 
+        if(null == user.getPassword() || user.getPassword().isEmpty())
+        {
+            throw new IllegalArgumentException();
+        }
+
         String hashedPassword = encodePassword(user.getPassword());
         user.setPassword(hashedPassword);
 
