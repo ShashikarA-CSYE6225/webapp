@@ -2,6 +2,7 @@ package com.csye6225.webapp.controller;
 
 import com.csye6225.webapp.dto.UserResponseDto;
 import com.csye6225.webapp.exception.IncorrectPasswordException;
+import com.csye6225.webapp.exception.InvalidAuthorizationException;
 import com.csye6225.webapp.exception.UserNotFoundException;
 import com.csye6225.webapp.exception.UsernameAlreadyExistsException;
 import com.csye6225.webapp.model.User;
@@ -31,17 +32,17 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createUser(@RequestBody User user) throws UsernameAlreadyExistsException {
-      UserResponseDto userResponse = userService.createUser(user);
+    public ResponseEntity<Object> createUser(@RequestBody User user, @RequestHeader(value = "Authorization", required = false) String auth) throws UsernameAlreadyExistsException, InvalidAuthorizationException {
+        UserResponseDto userResponse = userService.createUser(user, auth);
 
-      return ResponseEntity
-              .status(HttpStatus.OK)
-              .headers(headers)
-              .body(userResponse);
+        return ResponseEntity
+                  .status(HttpStatus.OK)
+                  .headers(headers)
+                  .body(userResponse);
     }
 
     @GetMapping("/self")
-    public ResponseEntity<Object> getUser(@RequestBody(required = false) User requestBody, @RequestHeader("Authorization") String basicAuth) throws UserNotFoundException, IncorrectPasswordException {
+    public ResponseEntity<Object> getUser(@RequestBody(required = false) User requestBody, @RequestHeader("Authorization") String basicAuth) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
         UserResponseDto userResponse = userService.getUser(requestBody, basicAuth);
 
         return ResponseEntity
@@ -58,7 +59,7 @@ public class UserController {
     }
 
     @PutMapping("self")
-    public ResponseEntity<Object> updateUser(@RequestHeader("Authorization") String basicAuth, @RequestBody User requestBody) throws UserNotFoundException, IncorrectPasswordException {
+    public ResponseEntity<Object> updateUser(@RequestHeader("Authorization") String basicAuth, @RequestBody User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
         UserResponseDto userResponse = userService.updateUser(basicAuth, requestBody);
 
         return ResponseEntity

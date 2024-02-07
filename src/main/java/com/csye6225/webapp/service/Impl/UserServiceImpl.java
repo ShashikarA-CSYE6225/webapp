@@ -2,6 +2,7 @@ package com.csye6225.webapp.service.Impl;
 
 import com.csye6225.webapp.dto.UserResponseDto;
 import com.csye6225.webapp.exception.IncorrectPasswordException;
+import com.csye6225.webapp.exception.InvalidAuthorizationException;
 import com.csye6225.webapp.exception.UserNotFoundException;
 import com.csye6225.webapp.exception.UsernameAlreadyExistsException;
 import com.csye6225.webapp.model.User;
@@ -23,7 +24,12 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Override
-    public UserResponseDto createUser(User user) throws UsernameAlreadyExistsException {
+    public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException, InvalidAuthorizationException {
+        if(null != auth && !auth.isEmpty())
+        {
+            throw new InvalidAuthorizationException();
+        }
+
         validateUserForCreation(user);
 
         String hashedPassword = encodePassword(user.getPassword());
@@ -64,7 +70,7 @@ public class UserServiceImpl implements UserService {
         return userResponseList.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
-    private User authenticateUser(String basicAuth) throws IncorrectPasswordException, UserNotFoundException {
+    private User authenticateUser(String basicAuth) throws IncorrectPasswordException, UserNotFoundException, InvalidAuthorizationException {
         String[] authorization = decodeBasicAuth(basicAuth);
         //System.out.println(Arrays.toString(authorization));
 
@@ -95,22 +101,32 @@ public class UserServiceImpl implements UserService {
         }
         else
         {
-            throw new NullPointerException();
+            throw new InvalidAuthorizationException();
         }
     }
 
     @Override
-    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException {
+    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
         validateUserForUpdate(requestBody);
 
         User authenticatedUser = authenticateUser(basicAuth);
 
-        authenticatedUser.setFirstName(requestBody.getFirstName());
-        authenticatedUser.setLastName(requestBody.getLastName());
+        if(null != requestBody.getFirstName() && !requestBody.getFirstName().isEmpty())
+        {
+            authenticatedUser.setFirstName(requestBody.getFirstName());
+        }
 
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String hashedPassword = passwordEncoder.encode(requestBody.getPassword());
-        authenticatedUser.setPassword(hashedPassword);
+        if(null != requestBody.getLastName() && !requestBody.getLastName().isEmpty())
+        {
+            authenticatedUser.setLastName(requestBody.getLastName());
+        }
+
+        if(null != requestBody.getPassword() && !requestBody.getPassword().isEmpty())
+        {
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            String hashedPassword = passwordEncoder.encode(requestBody.getPassword());
+            authenticatedUser.setPassword(hashedPassword);
+        }
 
         return mapToDto(userRepository.save(authenticatedUser));
     }
@@ -121,7 +137,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUser(User requestBody, String basicAuth) throws UserNotFoundException, IncorrectPasswordException {
+    public UserResponseDto getUser(User requestBody, String basicAuth) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
         if (requestBody != null) {
             throw new IllegalArgumentException();
         }

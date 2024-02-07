@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -70,7 +71,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .headers(headers)
-                .body(Collections.singletonMap("error","Invalid Request - Unwanted fields found"));
+                .body(Collections.singletonMap("error","Invalid Request - Not a valid request"));
     }
 
     @ExceptionHandler(UsernameAlreadyExistsException.class) //For Acc Created and Acc Updated - They Should not be given in request 400 Bad Request
@@ -81,12 +82,12 @@ public class GlobalExceptionHandler {
                 .body(Collections.singletonMap("error","Invalid Request - Username already exists"));
     }
 
-    @ExceptionHandler(NullPointerException.class) //Basic auth is null or null value in code - 400 Bad Request
+    @ExceptionHandler(InvalidAuthorizationException.class) //Basic auth is null or null value in code - 400 Bad Request
     public ResponseEntity<Object> handleNullPointerException() {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .headers(headers)
-                .body(Collections.singletonMap("error","Invalid Request - Basic Auth is Empty"));
+                .body(Collections.singletonMap("error","Invalid Request - Invalid Authorization"));
     }
 
     @ExceptionHandler(IncorrectPasswordException.class) //Basic auth is null or null value in code - 400 Bad Request
@@ -103,6 +104,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .headers(headers)
                 .body(Collections.singletonMap("error","Invalid Request - User not found"));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<Object> handleMissingRequestHeaderException() {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .headers(headers)
+                .body(Collections.singletonMap("error","Invalid Request - Authorization not found"));
     }
 
 }
