@@ -1,23 +1,18 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Java CI with Maven
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
   build:
-
+    name: Testing maven file
     runs-on: ubuntu-latest
+    env:
+      DB_DATABASE: cloudDatabase
+      DATABASE_USERNAME: ${{secrets.DATABASE_USERNAME}}
+      DATABASE_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
 
     steps:
       - uses: actions/checkout@v3
@@ -26,6 +21,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
+      - name: Start MySQL
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DATABASE_USERNAME -p$DATABASE_PASSWORD
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: mvn -B package --file pom.xml
