@@ -1,10 +1,7 @@
 package com.csye6225.webapp.controller;
 
 import com.csye6225.webapp.dto.UserResponseDto;
-import com.csye6225.webapp.exception.IncorrectPasswordException;
-import com.csye6225.webapp.exception.InvalidAuthorizationException;
-import com.csye6225.webapp.exception.UserNotFoundException;
-import com.csye6225.webapp.exception.UsernameAlreadyExistsException;
+import com.csye6225.webapp.exception.*;
 import com.csye6225.webapp.model.User;
 import com.csye6225.webapp.service.UserService;
 import org.springframework.http.CacheControl;
@@ -32,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createUser(@RequestBody User user, @RequestHeader(value = "Authorization", required = false) String auth) throws UsernameAlreadyExistsException{
+    public ResponseEntity<Object> createUser(@RequestBody User user, @RequestHeader(value = "Authorization", required = false) String auth) throws UsernameAlreadyExistsException, UserNotUpdatedException {
         UserResponseDto userResponse = userService.createUser(user, auth);
 
         return ResponseEntity
@@ -59,7 +56,7 @@ public class UserController {
     }
 
     @PutMapping("self")
-    public ResponseEntity<Object> updateUser(@RequestHeader("Authorization") String basicAuth, @RequestBody User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
+    public ResponseEntity<Object> updateUser(@RequestHeader("Authorization") String basicAuth, @RequestBody User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotUpdatedException {
         UserResponseDto userResponse = userService.updateUser(basicAuth, requestBody);
 
         return ResponseEntity
