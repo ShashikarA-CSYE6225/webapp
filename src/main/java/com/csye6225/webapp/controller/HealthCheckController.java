@@ -1,6 +1,8 @@
 package com.csye6225.webapp.controller;
 
 import com.csye6225.webapp.service.DatabaseHealthCheckService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/healthz")
 public class HealthCheckController {
+
     DatabaseHealthCheckService databaseHealthCheckService;
 
     public HealthCheckController(DatabaseHealthCheckService databaseHealthCheckService) {

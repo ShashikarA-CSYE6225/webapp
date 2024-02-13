@@ -1,10 +1,7 @@
 package com.csye6225.webapp.service.Impl;
 
 import com.csye6225.webapp.dto.UserResponseDto;
-import com.csye6225.webapp.exception.IncorrectPasswordException;
-import com.csye6225.webapp.exception.InvalidAuthorizationException;
-import com.csye6225.webapp.exception.UserNotFoundException;
-import com.csye6225.webapp.exception.UsernameAlreadyExistsException;
+import com.csye6225.webapp.exception.*;
 import com.csye6225.webapp.model.User;
 import com.csye6225.webapp.repository.UserRepository;
 import com.csye6225.webapp.service.UserService;
@@ -14,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,23 +23,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException {
-        if(null != auth && !auth.isEmpty())
-        {
-            throw new IllegalArgumentException();
-        }
+            if(null != auth && !auth.isEmpty())
+            {
+                throw new IllegalArgumentException();
+            }
 
-        validateUserForCreation(user);
+            validateUserForCreation(user);
 
-        if(null == user.getPassword() || user.getPassword().isEmpty())
-        {
-            throw new IllegalArgumentException();
-        }
+            if(null == user.getPassword() || user.getPassword().isEmpty())
+            {
+                throw new IllegalArgumentException();
+            }
 
-        String hashedPassword = encodePassword(user.getPassword());
-        user.setPassword(hashedPassword);
+            String hashedPassword = encodePassword(user.getPassword());
+            user.setPassword(hashedPassword);
 
-        User userResponse = userRepository.save(user);
-        return mapToDto(userResponse);
+            User userResponse = userRepository.save(user);
+            return mapToDto(userResponse);
     }
 
     private void validateUserForCreation(User user) throws UsernameAlreadyExistsException {
@@ -112,28 +110,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
-        validateUserForUpdate(requestBody);
+            validateUserForUpdate(requestBody);
 
-        User authenticatedUser = authenticateUser(basicAuth);
+            User authenticatedUser = authenticateUser(basicAuth);
 
-        if(null != requestBody.getFirstName() && !requestBody.getFirstName().isEmpty())
-        {
-            authenticatedUser.setFirstName(requestBody.getFirstName());
-        }
+            if(null != requestBody.getFirstName() && !requestBody.getFirstName().isEmpty())
+            {
+                authenticatedUser.setFirstName(requestBody.getFirstName());
+            }
 
-        if(null != requestBody.getLastName() && !requestBody.getLastName().isEmpty())
-        {
-            authenticatedUser.setLastName(requestBody.getLastName());
-        }
+            if(null != requestBody.getLastName() && !requestBody.getLastName().isEmpty())
+            {
+                authenticatedUser.setLastName(requestBody.getLastName());
+            }
 
-        if(null != requestBody.getPassword() && !requestBody.getPassword().isEmpty())
-        {
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            String hashedPassword = passwordEncoder.encode(requestBody.getPassword());
-            authenticatedUser.setPassword(hashedPassword);
-        }
+            if(null != requestBody.getPassword() && !requestBody.getPassword().isEmpty())
+            {
+                BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+                String hashedPassword = passwordEncoder.encode(requestBody.getPassword());
+                authenticatedUser.setPassword(hashedPassword);
+            }
 
-        return mapToDto(userRepository.save(authenticatedUser));
+            return mapToDto(userRepository.save(authenticatedUser));
     }
 
     @Override

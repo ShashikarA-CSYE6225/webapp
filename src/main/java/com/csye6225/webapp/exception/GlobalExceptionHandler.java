@@ -63,7 +63,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .headers(headers)
-                .body(Collections.singletonMap("error","Invalid Request - Email format not supported"));
+                .body(Collections.singletonMap("error","Invalid Request"));
     }
 
     @ExceptionHandler(IllegalArgumentException.class) //For Acc Created and Acc Updated - They Should not be given in request 400 Bad Request
@@ -112,6 +112,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .headers(headers)
                 .body(Collections.singletonMap("error","Invalid Request - Authorization not found"));
+    }
+
+    @ExceptionHandler(UserNotUpdatedException.class) //For blank values or general exception
+    public ResponseEntity<Object> handleUserNotUpdatedException() {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .headers(headers)
+                .body(Collections.singletonMap("error","Invalid Request"));
     }
 
 }
