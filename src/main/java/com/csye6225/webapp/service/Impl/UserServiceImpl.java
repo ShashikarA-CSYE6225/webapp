@@ -113,7 +113,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException{
+    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotUpdatedException {
+            if(null == requestBody.getFirstName() && null == requestBody.getLastName()
+                    && null == requestBody.getPassword())
+            {
+                throw new UserNotUpdatedException();
+            }
+
+            if((null!= requestBody.getFirstName() && requestBody.getFirstName().isBlank()) ||
+                    (null!= requestBody.getLastName() && requestBody.getLastName().isBlank()) || (null!= requestBody.getPassword() && requestBody.getPassword().isBlank()))
+            {
+                throw new UserNotUpdatedException();
+            }
+
             validateUserForUpdate(requestBody);
 
             User authenticatedUser = authenticateUser(basicAuth);

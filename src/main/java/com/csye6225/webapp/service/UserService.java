@@ -12,7 +12,7 @@ public interface UserService {
 
     public List<UserResponseDto> getAllUsers();
 
-    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException;
+    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotUpdatedException;
 
     public Optional<UserResponseDto> findByUserNameAndPassword(String userName, String password);
 
