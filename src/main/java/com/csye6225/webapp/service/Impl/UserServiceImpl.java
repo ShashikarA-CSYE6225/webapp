@@ -11,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public class UserServiceImpl implements UserService {
 
             validateUserForCreation(user);
 
-            if(null == user.getPassword() || user.getPassword().isEmpty())
+            if(validateForEmptyAndNullValues(user))
             {
                 throw new IllegalArgumentException();
             }
@@ -40,6 +39,11 @@ public class UserServiceImpl implements UserService {
 
             User userResponse = userRepository.save(user);
             return mapToDto(userResponse);
+    }
+
+    private boolean validateForEmptyAndNullValues(User user) {
+        return (null == user.getPassword() || user.getPassword().isEmpty()) ||
+                (null == user.getFirstName() || user.getFirstName().isEmpty()) || (null == user.getLastName() || user.getLastName().isEmpty());
     }
 
     private void validateUserForCreation(User user) throws UsernameAlreadyExistsException {
@@ -109,7 +113,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
+    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException{
             validateUserForUpdate(requestBody);
 
             User authenticatedUser = authenticateUser(basicAuth);
