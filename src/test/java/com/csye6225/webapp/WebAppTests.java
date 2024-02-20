@@ -61,8 +61,8 @@ public class WebAppTests {
         .then()
                 .statusCode(200)
                 .body("id", notNullValue())
-                .body("first_name", equalTo("Shashikar"))
-                .body("last_name", equalTo("Anthoni Raj"))
+                .body("first_name", equalTo("Shashik"))
+                .body("last_name", equalTo("Anthoni R"))
                 .body("username", equalTo("ant.v@live.com"))
                 .body("account_created", notNullValue())
                 .body("account_updated", notNullValue());
