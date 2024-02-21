@@ -20,7 +20,7 @@ jobs:
         run: cd packer
 
       - name: Packer init
-        run: packer init custom-image-centos.pkr.hcl
+        run: packer init .
 
       - name: Packer fmt
         run: packer fmt custom-image-centos.pkr.hcl
