@@ -55,6 +55,4 @@ build {
   provisioner "shell" {
     script = "./scripts/start_sysD.sh"
   }
-
-
 }
