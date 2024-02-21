@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Integration test
 
 on:
   pull_request:

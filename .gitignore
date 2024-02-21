@@ -70,3 +70,5 @@ secrets.yml
 .sts4-cache
 .git-hooks/
 /.idea
+
+*.auto.pkrvars.hcl

@@ -1,4 +1,4 @@
-name: Packer CI - PR
+name: Packer CI - fmt and validate
 
 on:
   pull_request:
