@@ -24,6 +24,11 @@ source "googlecompute" "centos-image-example" {
 build {
   sources = ["sources.googlecompute.centos-image-example"]
 
+  provisioner "file" {
+    source      = "../.env"
+    destination = "/tmp/"
+  }
+
   provisioner "shell" {
     script = "./scripts/create_user.sh"
   }
@@ -51,8 +56,5 @@ build {
     script = "./scripts/start_sysD.sh"
   }
 
-  provisioner "file" {
-    source      = "../.env"
-    destination = "/tmp/"
-  }
+
 }

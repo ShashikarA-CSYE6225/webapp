@@ -1,4 +1,4 @@
-name: Build and Create Custom Image
+name: Packer CI - Build Custom Image
 
 on:
   pull_request:
