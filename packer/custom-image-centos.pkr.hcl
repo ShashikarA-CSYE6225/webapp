@@ -25,28 +25,12 @@ source "googlecompute" "centos-image-example" {
 build {
   sources = ["sources.googlecompute.centos-image-example"]
 
-  provisioner "file" {
-    source      = "scripts/create_user.sh"
-    destination = "/tmp/create_user.sh"
+  provisioner "shell" {
+   script = "./scripts/create_user.sh"
   }
 
   provisioner "shell" {
-    inline = [
-      "chmod +x /tmp/create_user.sh",
-      "sudo /tmp/create_user.sh"
-    ]
-  }
-
-  provisioner "file" {
-    source      = "scripts/install_java_sql.sh"
-    destination = "/tmp/install_java_sql.sh"
-  }
-
-  provisioner "shell" {
-    inline = [
-      "chmod +x /tmp/install_java_sql.sh",
-      "sudo /tmp/install_java_sql.sh",
-    ]
+    script = "./scripts/install_java_sql.sh"
   }
 
   provisioner "file" {
@@ -54,40 +38,25 @@ build {
     destination = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
   }
 
-  provisioner "file" {
-    source      = "scripts/transfer_ownership.sh"
-    destination = "/tmp/transfer_ownership.sh"
-  }
-
   provisioner "shell" {
-    inline = [
-      "chmod +x /tmp/transfer_ownership.sh",
-      "sudo /tmp/transfer_ownership.sh",
-    ]
+    script = "./scripts/transfer_ownership.sh"
   }
 
-  #  provisioner "file" {
-  #    source      = "scripts/install_maven.sh"
-  #    destination = "/tmp/install_maven.sh"
-  #  }
-  #
-  #  provisioner "shell" {
-  #    inline = [
-  #      "chmod +x /tmp/install_maven.sh",
-  #      "sudo /tmp/install_maven.sh",
-  #    ]
-  #  }
 
-  #  provisioner "file" {
-  #    source      = "csye6225.service"
-  #    destination = "/etc/systemd/system/csye6225.service"
-  #  }
-  #
-  #  provisioner "shell" {
-  #    inline = [
-  #      "chmod 644 /etc/systemd/system/csye6225.service",
-  #      "systemctl daemon-reload",
-  #      "systemctl enable csye6225"
-  #    ]
-  #  }
+    provisioner "file" {
+      source      = "csye6225.service"
+      destination = "/tmp/csye6225.service"
+    }
+
+   provisioner "shell" {
+     script = "move_sysD.sh"
+   }
+
+    provisioner "shell" {
+      inline = [
+        "chmod 644 /etc/systemd/system/csye6225.service",
+        "systemctl daemon-reload",
+        "systemctl enable csye6225"
+      ]
+    }
 }

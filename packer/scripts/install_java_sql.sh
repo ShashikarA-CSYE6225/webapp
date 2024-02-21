@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install MySQL and start service
-dnf install -y mysql mysql-server
+sudo dnf install -y mysql mysql-server
 systemctl start mysqld
 
 # Wait for MySQL service to start
@@ -13,7 +13,7 @@ sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Sqlpassword1.';"
 echo "MySQL installation and root password setup completed."
 
 # Install OpenJDK 17
-dnf -y install java-17-openjdk java-17-openjdk-devel
+sudo dnf -y install java-17-openjdk java-17-openjdk-devel
 
 # Set up environment variables for Java
 cat > /etc/profile.d/java.sh <<'EOF'
