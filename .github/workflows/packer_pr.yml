@@ -1,0 +1,26 @@
+name: Packer CI - PR
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  packer:
+    name: Packer action - on PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@main
+
+      - name: Packer init
+        run: packer init .
+
+      - name: Packer fmt
+        run: packer fmt .
+
+      - name: Packer validate
+        run: packer validate .

@@ -66,28 +66,28 @@ build {
     ]
   }
 
-#  provisioner "file" {
-#    source      = "scripts/install_maven.sh"
-#    destination = "/tmp/install_maven.sh"
-#  }
-#
-#  provisioner "shell" {
-#    inline = [
-#      "chmod +x /tmp/install_maven.sh",
-#      "sudo /tmp/install_maven.sh",
-#    ]
-#  }
+  #  provisioner "file" {
+  #    source      = "scripts/install_maven.sh"
+  #    destination = "/tmp/install_maven.sh"
+  #  }
+  #
+  #  provisioner "shell" {
+  #    inline = [
+  #      "chmod +x /tmp/install_maven.sh",
+  #      "sudo /tmp/install_maven.sh",
+  #    ]
+  #  }
 
-  provisioner "file" {
-    source      = "csye6225.service"
-    destination = "/etc/systemd/system/csye6225.service"
-  }
-
-  provisioner "shell" {
-    inline = [
-      "chmod 644 /etc/systemd/system/csye6225.service",
-      "systemctl daemon-reload",
-      "systemctl enable csye6225"
-    ]
-  }
+  #  provisioner "file" {
+  #    source      = "csye6225.service"
+  #    destination = "/etc/systemd/system/csye6225.service"
+  #  }
+  #
+  #  provisioner "shell" {
+  #    inline = [
+  #      "chmod 644 /etc/systemd/system/csye6225.service",
+  #      "systemctl daemon-reload",
+  #      "systemctl enable csye6225"
+  #    ]
+  #  }
 }
