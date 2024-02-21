@@ -18,7 +18,6 @@ source "googlecompute" "centos-image-example" {
   ssh_username = var.ssh_username
   ssh_password = var.ssh_password
   ssh_timeout  = var.ssh_timeout
-  //credentials_file      = var.credentials_file
   service_account_email = var.service_account_email
 }
 

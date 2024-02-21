@@ -48,10 +48,6 @@ variable "ssh_timeout" {
   type        = string
 }
 
-variable "credentials_file" {
-  type = string
-}
-
 variable "service_account_email" {
   type = string
 }
