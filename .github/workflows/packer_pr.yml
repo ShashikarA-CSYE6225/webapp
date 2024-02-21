@@ -16,14 +16,14 @@ jobs:
       - name: Install Packer
         uses: hashicorp/setup-packer@main
 
-      - name: Change directory to packer
-        run: cd webapp/packer
-
       - name: Packer init
+        working-directory: ./packer
         run: packer init custom-image-centos.pkr.hcl
 
       - name: Packer fmt
+        working-directory: ./packer
         run: packer fmt custom-image-centos.pkr.hcl
 
       - name: Packer validate
+        working-directory: ./packer
         run: packer validate custom-image-centos.pkr.hcl
