@@ -62,7 +62,7 @@ jobs:
       - name: Init and Build Custom Image with Packer
         working-directory: ./packer
         run: |
-          packer init custom-image.pkr.hcl
-          packer fmt custom-image.pkr.hcl
-          packer validate custom-image.pkr.hcl
-          packer build custom-image.pkr.hcl
+          packer init .
+          packer fmt .
+          packer validate .
+          packer build .
