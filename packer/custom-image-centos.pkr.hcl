@@ -8,26 +8,21 @@ packer {
 }
 
 source "googlecompute" "centos-image-example" {
-  project_id   = var.project_id
-  source_image = var.source_image
-  image_name   = var.image_name
-  zone         = var.zone
-  disk_size    = var.disk_size
-  network      = var.network
-  communicator = var.communicator
-  ssh_username = var.ssh_username
-  ssh_password = var.ssh_password
-  ssh_timeout  = var.ssh_timeout
+  project_id            = var.project_id
+  source_image          = var.source_image
+  image_name            = var.image_name
+  zone                  = var.zone
+  disk_size             = var.disk_size
+  network               = var.network
+  communicator          = var.communicator
+  ssh_username          = var.ssh_username
+  ssh_password          = var.ssh_password
+  ssh_timeout           = var.ssh_timeout
   service_account_email = var.service_account_email
 }
 
 build {
   sources = ["sources.googlecompute.centos-image-example"]
-
-  provisioner "file" {
-    source      = "../.env"
-    destination = "/tmp/"
-  }
 
   provisioner "shell" {
     script = "./scripts/create_user.sh"
@@ -39,7 +34,7 @@ build {
 
   provisioner "file" {
     source      = "../target/webapp-0.0.1-SNAPSHOT.jar"
-    destination = "/tmp/webapp-0.0.1-SNAPSHOT.jar"
+    destination = "/tmp/"
   }
 
   provisioner "shell" {
@@ -54,5 +49,10 @@ build {
 
   provisioner "shell" {
     script = "./scripts/start_sysD.sh"
+  }
+
+  provisioner "file" {
+    source      = "../.env"
+    destination = "/tmp/"
   }
 }
