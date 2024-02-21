@@ -17,10 +17,10 @@ jobs:
         uses: hashicorp/setup-packer@main
 
       - name: Packer init
-        run: packer init .
+        run: packer init custom-image-centos.pkr.hcl
 
       - name: Packer fmt
-        run: packer fmt .
+        run: packer fmt custom-image-centos.pkr.hcl
 
       - name: Packer validate
-        run: packer validate .
+        run: packer validate custom-image-centos.pkr.hcl
