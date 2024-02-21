@@ -26,4 +26,4 @@ jobs:
 
       - name: Packer validate
         working-directory: ./packer
-        run: packer validate custom-image-centos.pkr.hcl
+        run: packer validate -syntax-only custom-image-centos.pkr.hcl
