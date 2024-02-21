@@ -8,25 +8,25 @@ packer {
 }
 
 source "googlecompute" "centos-image-example" {
-  project_id            = "csye6225-dev-414805"
-  source_image          = "centos-stream-8-v20240110"
-  image_name            = "centos-webapp"
-  zone                  = "us-east4-a"
-  disk_size             = 20
-  network               = "default"
-  communicator          = "ssh"
-  ssh_username          = "packer"
-  ssh_password          = "root"
-  ssh_timeout           = "1h"
-  credentials_file      = "csye6225-dev-414805-024b357000b2.json"
-  service_account_email = "centoscustomimage@csye6225-dev-414805.iam.gserviceaccount.com"
+  project_id   = var.project_id
+  source_image = var.source_image
+  image_name   = var.image_name
+  zone         = var.zone
+  disk_size    = var.disk_size
+  network      = var.network
+  communicator = var.communicator
+  ssh_username = var.ssh_username
+  ssh_password = var.ssh_password
+  ssh_timeout  = var.ssh_timeout
+  //credentials_file      = var.credentials_file
+  service_account_email = var.service_account_email
 }
 
 build {
   sources = ["sources.googlecompute.centos-image-example"]
 
   provisioner "shell" {
-   script = "./scripts/create_user.sh"
+    script = "./scripts/create_user.sh"
   }
 
   provisioner "shell" {
@@ -43,20 +43,17 @@ build {
   }
 
 
-    provisioner "file" {
-      source      = "csye6225.service"
-      destination = "/tmp/csye6225.service"
-    }
+  provisioner "file" {
+    source      = "./csye6225.service"
+    destination = "/tmp/"
+  }
 
-   provisioner "shell" {
-     script = "move_sysD.sh"
-   }
+  provisioner "shell" {
+    script = "./scripts/start_sysD.sh"
+  }
 
-    provisioner "shell" {
-      inline = [
-        "chmod 644 /etc/systemd/system/csye6225.service",
-        "systemctl daemon-reload",
-        "systemctl enable csye6225"
-      ]
-    }
+  provisioner "file" {
+    source      = "../.env"
+    destination = "/tmp/"
+  }
 }

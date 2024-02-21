@@ -2,7 +2,7 @@
 
 # Install MySQL and start service
 sudo dnf install -y mysql mysql-server
-systemctl start mysqld
+sudo systemctl start mysqld
 
 # Wait for MySQL service to start
 sleep 5
