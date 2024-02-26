@@ -8,7 +8,7 @@ packer {
 }
 
 source "googlecompute" "centos-image-example" {
-  project_id            = var.project_id
+  project_id            =   var.project_id
   source_image          = var.source_image
   image_name            = var.image_name
   zone                  = var.zone
