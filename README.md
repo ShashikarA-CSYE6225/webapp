@@ -8,7 +8,7 @@ This web application provides a RESTful APIs for managing user accounts. Users c
 
 - Java (jdk 17)
 - Spring Boot (version 3.2.2)
-- Database (MySQL)
+- Database (MySQL )
 - BCrypt for password hashing
 
 ## Getting Started
