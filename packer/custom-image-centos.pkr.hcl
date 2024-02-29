@@ -7,7 +7,7 @@ packer {
   }
 }
 
-source "googlecompute" "centos-image-example" {
+source "googlecompute" "centos-image" {
   project_id            = var.project_id
   source_image          = var.source_image
   image_name            = var.image_name
@@ -22,14 +22,14 @@ source "googlecompute" "centos-image-example" {
 }
 
 build {
-  sources = ["sources.googlecompute.centos-image-example"]
+  sources = ["sources.googlecompute.centos-image"]
 
   provisioner "shell" {
     script = "./scripts/create_user.sh"
   }
 
   provisioner "shell" {
-    script = "./scripts/install_java_sql.sh"
+    script = "./scripts/install_java.sh"
   }
 
   provisioner "file" {
@@ -41,7 +41,6 @@ build {
     script = "./scripts/transfer_ownership.sh"
   }
 
-
   provisioner "file" {
     source      = "./csye6225.service"
     destination = "/tmp/"
@@ -49,10 +48,5 @@ build {
 
   provisioner "shell" {
     script = "./scripts/start_sysD.sh"
-  }
-
-  provisioner "file" {
-    source      = "../.env"
-    destination = "/tmp/"
   }
 }

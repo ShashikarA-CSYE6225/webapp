@@ -48,11 +48,6 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      - name: Creating .env file
-        run: |
-              echo "DATABASE_URL=${{secrets.DATABASE_URL}}" > .env
-              echo "DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}}" >> .env
-              echo "DATABASE_PASSWORD=${{secrets.DATABASE_PASSWORD}}" >> .env
       - name: GCP Credentials
         uses: 'google-github-actions/auth@v2'
         with:
