@@ -61,6 +61,6 @@ jobs:
         working-directory: ./packer
         run: |
           packer init .
-          packer fmt .
+          packer fmt -check .
           packer validate .
           packer build .
