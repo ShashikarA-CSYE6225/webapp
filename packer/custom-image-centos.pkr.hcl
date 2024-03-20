@@ -49,4 +49,8 @@ build {
   provisioner "shell" {
     script = "./scripts/start_sysD.sh"
   }
+
+  provisioner "shell" {
+    script = "./scripts/install_ops_agent.sh"
+  }
 }

@@ -1,6 +1,7 @@
 package com.csye6225.webapp.controller;
 
 import com.csye6225.webapp.service.DatabaseHealthCheckService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.CacheControl;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/healthz")
+@Slf4j
 public class HealthCheckController {
 
     DatabaseHealthCheckService databaseHealthCheckService;
@@ -31,6 +33,7 @@ public class HealthCheckController {
         if((null != queryParams && !queryParams.isEmpty()) ||
                 (null != requestBody && !requestBody.isEmpty()))
         {
+            log.error("Invalid request details given");
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .headers(headers)
@@ -41,6 +44,7 @@ public class HealthCheckController {
 
         if(isDatabaseConnected)
         {
+            log.info("Database connection successful");
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .headers(headers)
@@ -48,6 +52,7 @@ public class HealthCheckController {
         }
         else
         {
+            log.error("Database connection not successful");
             return ResponseEntity
                     .status(HttpStatus.SERVICE_UNAVAILABLE)
                     .headers(headers)
