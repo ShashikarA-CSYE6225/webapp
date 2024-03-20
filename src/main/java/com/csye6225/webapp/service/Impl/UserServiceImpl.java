@@ -6,6 +6,7 @@ import com.csye6225.webapp.model.User;
 import com.csye6225.webapp.repository.UserRepository;
 import com.csye6225.webapp.service.UserService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
@@ -31,6 +33,7 @@ public class UserServiceImpl implements UserService {
 
             if(validateForEmptyAndNullValues(user))
             {
+                log.error("required request fields are null or empty");
                 throw new IllegalArgumentException();
             }
 
@@ -38,6 +41,9 @@ public class UserServiceImpl implements UserService {
             user.setPassword(hashedPassword);
 
             User userResponse = userRepository.save(user);
+
+            log.info("user successfully created for user: " + userResponse.getId());
+
             return mapToDto(userResponse);
     }
 
@@ -49,10 +55,12 @@ public class UserServiceImpl implements UserService {
     private void validateUserForCreation(User user) throws UsernameAlreadyExistsException {
         if ((user.getAccountCreated() != null && !user.getAccountCreated().isEmpty()) ||
                 (user.getAccountUpdated() != null && !user.getAccountUpdated().isEmpty())) {
+            log.error("Invalid request fields given");
             throw new IllegalArgumentException();
         }
 
         if (userRepository.findByUserName(user.getUserName()).isPresent()) {
+            log.error("Error creating user, username already exists");
             throw new UsernameAlreadyExistsException();
         }
     }
@@ -62,6 +70,7 @@ public class UserServiceImpl implements UserService {
                 (null != requestBody.getAccountCreated() && !requestBody.getAccountCreated().isEmpty()) ||
                 (null != requestBody.getAccountUpdated() && !requestBody.getAccountUpdated().isEmpty()))
         {
+            log.error("invalid request details given");
             throw new IllegalArgumentException();
         }
     }
@@ -98,16 +107,19 @@ public class UserServiceImpl implements UserService {
                 }
                 else
                 {
+                    log.error("Invalid login details");
                     throw new IncorrectPasswordException();
                 }
             }
             else
             {
+                log.error("Invalid login details");
                 throw new UserNotFoundException();
             }
         }
         else
         {
+            log.error("No authorization given");
             throw new InvalidAuthorizationException();
         }
     }
@@ -117,12 +129,14 @@ public class UserServiceImpl implements UserService {
             if(null == requestBody.getFirstName() && null == requestBody.getLastName()
                     && null == requestBody.getPassword())
             {
+                log.error("invalid request details given");
                 throw new UserNotUpdatedException();
             }
 
             if((null!= requestBody.getFirstName() && requestBody.getFirstName().isBlank()) ||
                     (null!= requestBody.getLastName() && requestBody.getLastName().isBlank()) || (null!= requestBody.getPassword() && requestBody.getPassword().isBlank()))
             {
+                log.error("invalid request details given");
                 throw new UserNotUpdatedException();
             }
 
@@ -158,6 +172,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto getUser(User requestBody, String basicAuth) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
         if (requestBody != null) {
+            log.error("invalid request details given");
             throw new IllegalArgumentException();
         }
 

@@ -47,7 +47,7 @@ public class WebAppTests {
     @Order(1)
     void getUser() throws Exception {
         User user = new User();
-        user.setUserName("ant.v@live.com");
+        user.setUserName("ant1.v@live.com");
         user.setFirstName("Shashikar");
         user.setLastName("Anthoni Raj");
         user.setPassword("AV");
@@ -59,17 +59,17 @@ public class WebAppTests {
         .when()
                 .post("/v1/user")
         .then()
-                .statusCode(200)
+                .statusCode(201)
                 .body("id", notNullValue())
                 .body("first_name", equalTo("Shashikar"))
                 .body("last_name", equalTo("Anthoni Raj"))
-                .body("username", equalTo("ant.v@live.com"))
+                .body("username", equalTo("ant1.v@live.com"))
                 .body("account_created", notNullValue())
                 .body("account_updated", notNullValue());
 
         //GET Call
         HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth("ant.v@live.com", "AV");
+        headers.setBasicAuth("ant1.v@live.com", "AV");
 
 
         given()
@@ -81,7 +81,7 @@ public class WebAppTests {
                 .body("id", notNullValue())
                 .body("first_name", equalTo("Shashikar"))
                 .body("last_name", equalTo("Anthoni Raj"))
-                .body("username", equalTo("ant.v@live.com"))
+                .body("username", equalTo("ant1.v@live.com"))
                 .body("account_created", notNullValue())
                 .body("account_updated", notNullValue());
     }
@@ -98,7 +98,7 @@ public class WebAppTests {
     @Order(2)
     void updateUser() throws Exception {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth("ant.v@live.com", "AV");
+        headers.setBasicAuth("ant1.v@live.com", "AV");
 
         User user = new User();
         user.setFirstName("Shashi");
@@ -114,7 +114,7 @@ public class WebAppTests {
         .then()
                 .statusCode(204);
 
-        headers.setBasicAuth("ant.v@live.com", user.getPassword());
+        headers.setBasicAuth("ant1.v@live.com", user.getPassword());
 
         given()
                 .headers(headers)
@@ -125,7 +125,7 @@ public class WebAppTests {
                 .body("id", notNullValue())
                 .body("first_name", equalTo(user.getFirstName()))
                 .body("last_name", equalTo(user.getLastName()))
-                .body("username", equalTo("ant.v@live.com"))
+                .body("username", equalTo("ant1.v@live.com"))
                 .body("account_created", notNullValue())
                 .body("account_updated", notNullValue());
     }
