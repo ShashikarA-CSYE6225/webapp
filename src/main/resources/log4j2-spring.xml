@@ -6,15 +6,16 @@
         </Console>
 
         <File name="webappLog" fileName="/var/log/webapp.log">
-            <JsonLayout complete="false" compact="false" includeStacktrace="true">
+            <JsonLayout complete="false" compact="true" includeStacktrace="false" eventEOL="true">
                 <KeyValuePair key="timestamp" value="$${date:yyyy-MM-dd'T'HH:mm:ss.SSSXXX'Z'}"/>
             </JsonLayout>
         </File>
     </Appenders>
     <Loggers>
-        <Root level="info">
+        <Root level="debug">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="webappLog"/>
         </Root>
+        <Logger name="org" level="INFO"/>
     </Loggers>
 </Configuration>
