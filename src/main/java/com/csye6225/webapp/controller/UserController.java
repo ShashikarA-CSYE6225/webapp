@@ -36,6 +36,7 @@ public class UserController {
     public ResponseEntity<Object> createUser(@RequestBody User user, @RequestHeader(value = "Authorization", required = false) String auth) throws UsernameAlreadyExistsException, UserNotUpdatedException {
         UserResponseDto userResponse = userService.createUser(user, auth);
         log.info("User Creation Request successful with status code - 201 for user: " + userResponse.getId());
+        log.debug("User Request Payload: " + user);
         return ResponseEntity
                   .status(HttpStatus.CREATED)
                   .headers(headers)
@@ -46,6 +47,7 @@ public class UserController {
     public ResponseEntity<Object> getUser(@RequestBody(required = false) User requestBody, @RequestHeader("Authorization") String basicAuth) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
         UserResponseDto userResponse = userService.getUser(requestBody, basicAuth);
         log.info("User GET Request successful with status code - 200 for user: " + userResponse.getId());
+        log.debug("User Response Payload: " + userResponse);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .headers(headers)
@@ -63,6 +65,7 @@ public class UserController {
     public ResponseEntity<Object> updateUser(@RequestHeader("Authorization") String basicAuth, @RequestBody User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotUpdatedException {
         UserResponseDto userResponse = userService.updateUser(basicAuth, requestBody);
         log.info("User Update Request successful with status code - 204 for user: " + userResponse.getId());
+        log.debug("User Request Payload: " + requestBody);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .headers(headers)

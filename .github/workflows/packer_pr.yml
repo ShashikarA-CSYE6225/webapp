@@ -41,7 +41,9 @@ jobs:
           sudo /etc/init.d/mysql start
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: |
+          sudo chmod 733 /var/log/
+          mvn -B package --file pom.xml
 
       - name: GCP Credentials
         uses: 'google-github-actions/auth@v2'

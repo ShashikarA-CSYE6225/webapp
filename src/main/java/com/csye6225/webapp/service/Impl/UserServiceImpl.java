@@ -26,6 +26,7 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException {
             if(null != auth && !auth.isEmpty())
             {
+                log.error("Authorization is given but not required");
                 throw new IllegalArgumentException();
             }
 
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
             User userResponse = userRepository.save(user);
 
-            log.info("user successfully created for user: " + userResponse.getId());
+            log.debug("User Response Payload: " + userResponse);
 
             return mapToDto(userResponse);
     }
@@ -156,6 +157,7 @@ public class UserServiceImpl implements UserService {
 
             if(null != requestBody.getPassword() && !requestBody.getPassword().isEmpty())
             {
+                log.warn("Password Updated!!");
                 BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
                 String hashedPassword = passwordEncoder.encode(requestBody.getPassword());
                 authenticatedUser.setPassword(hashedPassword);
