@@ -18,17 +18,11 @@ logging:
       type: parse_json
       time_key: time
       time_format: "%Y-%m-%dT%H:%M:%S.%L%Z"
-    extract_structure:
-          type: parse_regex
-          field: message
-          regex: "^(?<time>[\d-]*T[\d:.Z]*) (?<severity>[^ ]*) (?<file>[^ :]*):(?<line>[\d]*) - (?<message>(.|\\n)*)$"
-          time_key: time
-          time_format: "%Y-%m-%dT%H:%M:%S.%L"
     move_severity:
-          type: modify_fields
-          fields:
-            severity:
-              move_from: jsonPayload.severity
+      type: modify_fields
+      fields:
+        severity:
+          move_from: jsonPayload.Severity
   service:
     pipelines:
       default_pipeline:
@@ -43,3 +37,6 @@ config_file="/etc/google-cloud-ops-agent/config.yaml"
 # Append YAML content to the config file
 echo "$yaml_content" | sudo tee -a "$config_file" > /dev/null
 echo "YAML content appended to $config_file"
+
+#Restart the config.yaml file
+sudo service google-cloud-ops-agent restart
