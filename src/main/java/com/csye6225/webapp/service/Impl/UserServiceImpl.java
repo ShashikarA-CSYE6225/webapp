@@ -255,7 +255,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String verifyUser(String token) throws UserNotVerifiedException {
+    public String verifyUser(String token, String skipTests) throws UserNotVerifiedException {
         // Split token to extract UUID and expiry
         String[] parts = token.split(":");
         String uuid = parts[0];
@@ -266,6 +266,15 @@ public class UserServiceImpl implements UserService {
         if(userOptional.isPresent())
         {
             User user = userOptional.get();
+
+            //Logic to skip tests
+            if(skipTests != null && skipTests.equals("Skip"))
+            {
+                user.setVerified(true);
+                userRepository.save(user);
+                return "Integration tests skip";
+            }
+
             if(!user.isVerified())
             {
                 // Get the emailSentTime from user

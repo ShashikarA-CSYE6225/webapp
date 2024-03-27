@@ -61,6 +61,5 @@ public class User {
     private boolean isVerified;
 
     @Column(name = "email_sent_time")
-    @CreationTimestamp
     private Date emailSentTime;
 }
