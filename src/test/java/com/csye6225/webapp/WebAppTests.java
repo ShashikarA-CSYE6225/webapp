@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -53,7 +54,7 @@ public class WebAppTests {
         user.setPassword("AV");
 
         //POST Call
-        given()
+        ValidatableResponse validateResponse = given()
                 .contentType("application/json")
                 .body(writeAsJsonString(user))
         .when()
@@ -67,10 +68,23 @@ public class WebAppTests {
                 .body("account_created", notNullValue())
                 .body("account_updated", notNullValue());
 
+        //Creating token for Verify email call
+        String uuid = validateResponse.extract().path("id");
+        String username = validateResponse.extract().path("username");
+
+        String token = uuid + ":" + username;
+
+        //Verify Email Call
+        given()
+                .param("token", token)
+        .when()
+                .get("/v1/user/verify")
+        .then()
+                .statusCode(200);
+
         //GET Call
         HttpHeaders headers = new HttpHeaders();
         headers.setBasicAuth("ant1.v@live.com", "AV");
-
 
         given()
                 .headers(headers)

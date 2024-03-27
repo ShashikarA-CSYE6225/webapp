@@ -122,4 +122,12 @@ public class GlobalExceptionHandler {
                 .body(Collections.singletonMap("error","Invalid Request"));
     }
 
+    @ExceptionHandler(UserNotVerifiedException.class) //For blank values or general exception
+    public ResponseEntity<Object> handleUserNotVerifiedException() {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .headers(headers)
+                .body(Collections.singletonMap("error","User Not Verified!!"));
+    }
+
 }

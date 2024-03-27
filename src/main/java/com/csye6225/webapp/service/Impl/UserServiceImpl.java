@@ -5,11 +5,28 @@ import com.csye6225.webapp.exception.*;
 import com.csye6225.webapp.model.User;
 import com.csye6225.webapp.repository.UserRepository;
 import com.csye6225.webapp.service.UserService;
+import com.google.api.gax.core.CredentialsProvider;
+import com.google.auth.oauth2.GoogleCredentials;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.google.api.core.ApiFuture;
+import com.google.cloud.pubsub.v1.Publisher;
+import com.google.protobuf.ByteString;
+import com.google.pubsub.v1.PubsubMessage;
+import com.google.pubsub.v1.TopicName;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +40,7 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Override
-    public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException {
+    public UserResponseDto createUser(User user, String auth) throws UsernameAlreadyExistsException, IOException, ExecutionException, InterruptedException {
             if(null != auth && !auth.isEmpty())
             {
                 log.error("Authorization is given but not required");
@@ -45,7 +62,39 @@ public class UserServiceImpl implements UserService {
 
             log.debug("User Response Payload: " + userResponse);
 
+            String projectId = "csye6225-dev-414805";
+            String topicId = "verify-email";
+
+            publishEmail(projectId, topicId, userResponse.getUserName(), userResponse.getId());
+
             return mapToDto(userResponse);
+    }
+
+
+    public static void publishEmail(String projectId, String topicId, String email, String uuid)
+            throws IOException, ExecutionException, InterruptedException {
+        TopicName topicName = TopicName.of(projectId, topicId);
+
+        Publisher publisher = null;
+        try {
+            // Create a publisher instance with default settings bound to the topic
+            publisher = Publisher.newBuilder(topicName).build();
+
+            ByteString data = ByteString.copyFromUtf8(uuid + ":" + email);
+            PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
+
+            // Once published, returns a server-assigned message id (unique within the topic)
+            ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
+            String messageId = messageIdFuture.get();
+            System.out.println("Published message ID: " + messageId);
+        }
+        finally {
+            if (publisher != null) {
+                // When finished with the publisher, shutdown to free up resources.
+                publisher.shutdown();
+                publisher.awaitTermination(1, TimeUnit.MINUTES);
+            }
+        }
     }
 
     private boolean validateForEmptyAndNullValues(User user) {
@@ -87,7 +136,7 @@ public class UserServiceImpl implements UserService {
         return userResponseList.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
-    private User authenticateUser(String basicAuth) throws IncorrectPasswordException, UserNotFoundException, InvalidAuthorizationException {
+    private User authenticateUser(String basicAuth) throws IncorrectPasswordException, UserNotFoundException, InvalidAuthorizationException, UserNotVerifiedException {
         String[] authorization = decodeBasicAuth(basicAuth);
         //System.out.println(Arrays.toString(authorization));
 
@@ -99,18 +148,26 @@ public class UserServiceImpl implements UserService {
 
             if(existingUser.isPresent())
             {
-                String hashedPassword = existingUser.get().getPassword();
-                BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-                if(passwordEncoder.matches(password, hashedPassword))
+                if(existingUser.get().isVerified())
                 {
-                    return existingUser.get();
+                    String hashedPassword = existingUser.get().getPassword();
+                    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+                    if(passwordEncoder.matches(password, hashedPassword))
+                    {
+                        return existingUser.get();
+                    }
+                    else
+                    {
+                        log.error("Invalid login details");
+                        throw new IncorrectPasswordException();
+                    }
                 }
                 else
                 {
-                    log.error("Invalid login details");
-                    throw new IncorrectPasswordException();
+                    throw new UserNotVerifiedException();
                 }
+
             }
             else
             {
@@ -126,7 +183,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotUpdatedException {
+    public UserResponseDto updateUser(String basicAuth, User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotUpdatedException, UserNotVerifiedException {
             if(null == requestBody.getFirstName() && null == requestBody.getLastName()
                     && null == requestBody.getPassword())
             {
@@ -172,7 +229,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUser(User requestBody, String basicAuth) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
+    public UserResponseDto getUser(User requestBody, String basicAuth) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotVerifiedException {
         if (requestBody != null) {
             log.error("invalid request details given");
             throw new IllegalArgumentException();
@@ -195,5 +252,56 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto mapToDto(User user) {
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper.map(user, UserResponseDto.class);
+    }
+
+    @Override
+    public String verifyUser(String token) throws UserNotVerifiedException {
+        // Split token to extract UUID and expiry
+        String[] parts = token.split(":");
+        String uuid = parts[0];
+        String email = parts[1];
+
+        Optional<User> userOptional = userRepository.findByUserName(email);
+
+        if(userOptional.isPresent())
+        {
+            User user = userOptional.get();
+            if(!user.isVerified())
+            {
+                // Get the emailSentTime from user
+                Date emailSentTimeLocal = user.getEmailSentTime();
+
+                // Convert emailSentTime from UTC to Instant
+                Instant emailSentTime = emailSentTimeLocal.toInstant();
+
+                // Get the current time in UTC
+                Instant currentTime = Instant.now();
+
+                // Calculate the duration between email sent time and current time
+                Duration duration = Duration.between(emailSentTime, currentTime);
+
+                System.out.println(emailSentTime);
+                System.out.println(currentTime);
+
+                // Check if the duration is less than 2 minutes
+                if (user.getId().equals(uuid) && duration.toMinutes() < 2) {
+                    user.setVerified(true);
+                    userRepository.save(user);
+                    return "User Verified Successfully";
+                }
+                else
+                {
+                    throw new UserNotVerifiedException();
+                }
+            }
+            else
+            {
+                return "User Already Verified!!";
+            }
+        }
+        else
+        {
+            throw new UserNotVerifiedException();
+        }
     }
 }

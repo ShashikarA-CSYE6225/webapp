@@ -10,7 +10,7 @@ packer {
 source "googlecompute" "centos-image" {
   project_id            = var.project_id
   source_image          = var.source_image
-  image_name            = var.image_name
+  image_name            = "${var.image_name}-{{timestamp}}"
   zone                  = var.zone
   disk_size             = var.disk_size
   network               = var.network
