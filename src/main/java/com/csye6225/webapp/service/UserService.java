@@ -22,5 +22,5 @@ public interface UserService {
 
     public UserResponseDto mapToDto(User user);
 
-    public String verifyUser(String token, String skipTests) throws UserNotVerifiedException;
+    public String verifyUser(String token) throws UserNotVerifiedException;
 }
