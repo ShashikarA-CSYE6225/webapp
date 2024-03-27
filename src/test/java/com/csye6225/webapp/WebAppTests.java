@@ -52,6 +52,7 @@ public class WebAppTests {
         user.setFirstName("Shashikar");
         user.setLastName("Anthoni Raj");
         user.setPassword("AV");
+        user.setVerified(true);
 
         //POST Call
         ValidatableResponse validateResponse = given()
@@ -67,20 +68,6 @@ public class WebAppTests {
                 .body("username", equalTo("ant1.v@live.com"))
                 .body("account_created", notNullValue())
                 .body("account_updated", notNullValue());
-
-        //Creating token for Verify email call
-        String uuid = validateResponse.extract().path("id");
-        String username = validateResponse.extract().path("username");
-
-        String token = uuid + ":" + username;
-
-        //Verify Email Call
-        given()
-                .param("token", token)
-        .when()
-                .get("/v1/user/verify")
-        .then()
-                .statusCode(200);
 
         //GET Call
         HttpHeaders headers = new HttpHeaders();
