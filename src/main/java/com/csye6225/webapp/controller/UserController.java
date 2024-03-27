@@ -47,8 +47,8 @@ public class UserController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<Object> verifyUser(@RequestParam("token") String token, @RequestHeader(value = "Testing", required = false) String skipTests) throws UserNotVerifiedException {
-        String isVerified = userService.verifyUser(token, skipTests);
+    public ResponseEntity<Object> verifyUser(@RequestParam("token") String token) throws UserNotVerifiedException {
+        String isVerified = userService.verifyUser(token);
 
             return ResponseEntity
                     .status(HttpStatus.OK)
