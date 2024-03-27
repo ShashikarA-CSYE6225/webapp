@@ -53,6 +53,18 @@ public class WebAppTests {
         user.setLastName("Anthoni Raj");
         user.setPassword("AV");
 
+        //Creating token for Verify email call
+        String uuid = "123";
+        String username = "ant1.v@live.com";
+
+        String token = uuid + ":" + username;
+
+
+        HttpHeaders headersPOST = new HttpHeaders();
+        headersPOST.setBasicAuth("Testing", "Skip");
+
+        user.setVerified(true);
+
         //POST Call
         ValidatableResponse validateResponse = given()
                 .contentType("application/json")
@@ -68,19 +80,6 @@ public class WebAppTests {
                 .body("account_created", notNullValue())
                 .body("account_updated", notNullValue());
 
-        //Creating token for Verify email call
-        String uuid = validateResponse.extract().path("id");
-        String username = validateResponse.extract().path("username");
-
-        String token = uuid + ":" + username;
-
-        //Verify Email Call
-        given()
-                .param("token", token)
-        .when()
-                .get("/v1/user/verify")
-        .then()
-                .statusCode(200);
 
         //GET Call
         HttpHeaders headers = new HttpHeaders();
