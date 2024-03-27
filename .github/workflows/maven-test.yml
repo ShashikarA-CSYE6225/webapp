@@ -25,6 +25,12 @@ jobs:
         run: |
           sudo /etc/init.d/mysql start
           mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE;" -u$DATABASE_USERNAME -p$DATABASE_PASSWORD
+
+      - name: GCP Credentials
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{secrets.GCP_CREDENTIALS}}'
+
       - name: Build with Maven
         run: |
           sudo chmod 733 /var/log/
