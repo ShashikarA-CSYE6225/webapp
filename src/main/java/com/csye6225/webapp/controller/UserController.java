@@ -12,7 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+
 import org.apache.logging.log4j.Logger;
 
 @RestController
@@ -33,7 +36,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createUser(@RequestBody User user, @RequestHeader(value = "Authorization", required = false) String auth) throws UsernameAlreadyExistsException, UserNotUpdatedException {
+    public ResponseEntity<Object> createUser(@RequestBody User user, @RequestHeader(value = "Authorization", required = false) String auth) throws UsernameAlreadyExistsException, UserNotUpdatedException, IOException, ExecutionException, InterruptedException {
         UserResponseDto userResponse = userService.createUser(user, auth);
         log.info("User Creation Request successful with status code - 201 for user: " + userResponse.getId());
         log.debug("User Request Payload: " + user);
@@ -43,8 +46,18 @@ public class UserController {
                   .body(userResponse);
     }
 
+    @GetMapping("/verify")
+    public ResponseEntity<Object> verifyUser(@RequestParam("token") String token) throws UserNotVerifiedException {
+        String isVerified = userService.verifyUser(token);
+
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .headers(headers)
+                    .body(Collections.singletonMap("Verification Status", isVerified));
+    }
+
     @GetMapping("/self")
-    public ResponseEntity<Object> getUser(@RequestBody(required = false) User requestBody, @RequestHeader("Authorization") String basicAuth) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException {
+    public ResponseEntity<Object> getUser(@RequestBody(required = false) User requestBody, @RequestHeader("Authorization") String basicAuth) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotVerifiedException {
         UserResponseDto userResponse = userService.getUser(requestBody, basicAuth);
         log.info("User GET Request successful with status code - 200 for user: " + userResponse.getId());
         log.debug("User Response Payload: " + userResponse);
@@ -52,7 +65,6 @@ public class UserController {
                 .status(HttpStatus.OK)
                 .headers(headers)
                 .body(userResponse);
-
     }
 
     @GetMapping("/all")
@@ -62,7 +74,7 @@ public class UserController {
     }
 
     @PutMapping("self")
-    public ResponseEntity<Object> updateUser(@RequestHeader("Authorization") String basicAuth, @RequestBody User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotUpdatedException {
+    public ResponseEntity<Object> updateUser(@RequestHeader("Authorization") String basicAuth, @RequestBody User requestBody) throws UserNotFoundException, IncorrectPasswordException, InvalidAuthorizationException, UserNotUpdatedException, UserNotVerifiedException {
         UserResponseDto userResponse = userService.updateUser(basicAuth, requestBody);
         log.info("User Update Request successful with status code - 204 for user: " + userResponse.getId());
         log.debug("User Request Payload: " + requestBody);

@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.util.Date;
+
 
 @Data
 @Builder
@@ -54,4 +56,11 @@ public class User {
     @CreationTimestamp
     @JsonProperty("account_created")
     private String accountCreated;
+
+    @Column(name = "is_verified")
+    private boolean isVerified;
+
+    @Column(name = "email_sent_time")
+    @CreationTimestamp
+    private Date emailSentTime;
 }
