@@ -47,7 +47,7 @@ public class UserController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<Object> verifyUser(@RequestParam("token") String token) throws UserNotVerifiedException {
+    public ResponseEntity<Object> verifyUser(@RequestParam("token") String token) throws UserNotVerifiedException, UserNotFoundException, TokenExpiredException {
         String isVerified = userService.verifyUser(token);
 
             return ResponseEntity

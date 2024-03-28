@@ -255,7 +255,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String verifyUser(String token) throws UserNotVerifiedException {
+    public String verifyUser(String token) throws TokenExpiredException, UserNotFoundException {
         // Split token to extract UUID and expiry
         String[] parts = token.split(":");
         String uuid = parts[0];
@@ -291,7 +291,7 @@ public class UserServiceImpl implements UserService {
                 }
                 else
                 {
-                    throw new UserNotVerifiedException();
+                    throw new TokenExpiredException();
                 }
             }
             else
@@ -301,7 +301,7 @@ public class UserServiceImpl implements UserService {
         }
         else
         {
-            throw new UserNotVerifiedException();
+            throw new UserNotFoundException();
         }
     }
 }

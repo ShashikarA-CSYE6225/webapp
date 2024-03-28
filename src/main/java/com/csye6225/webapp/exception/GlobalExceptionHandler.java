@@ -130,4 +130,11 @@ public class GlobalExceptionHandler {
                 .body(Collections.singletonMap("error","User Not Verified!!"));
     }
 
+    @ExceptionHandler(TokenExpiredException.class) //For blank values or general exception
+    public ResponseEntity<Object> handleTokenExpiredException() {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .headers(headers)
+                .body(Collections.singletonMap("error","Email Verification Token Expired!!"));
+    }
 }
