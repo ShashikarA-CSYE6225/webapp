@@ -125,7 +125,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotVerifiedException.class) //For blank values or general exception
     public ResponseEntity<Object> handleUserNotVerifiedException() {
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+                .status(HttpStatus.FORBIDDEN)
                 .headers(headers)
                 .body(Collections.singletonMap("error","User Not Verified!!"));
     }
@@ -133,7 +133,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenExpiredException.class) //For blank values or general exception
     public ResponseEntity<Object> handleTokenExpiredException() {
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+                .status(HttpStatus.FORBIDDEN)
                 .headers(headers)
                 .body(Collections.singletonMap("error","Email Verification Token Expired!!"));
     }
