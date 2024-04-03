@@ -5,8 +5,6 @@ import com.csye6225.webapp.exception.*;
 import com.csye6225.webapp.model.User;
 import com.csye6225.webapp.repository.UserRepository;
 import com.csye6225.webapp.service.UserService;
-import com.google.api.gax.core.CredentialsProvider;
-import com.google.auth.oauth2.GoogleCredentials;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -19,12 +17,12 @@ import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.TopicName;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.TimeZone;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -65,7 +63,12 @@ public class UserServiceImpl implements UserService {
             String projectId = "csye6225-dev-414805";
             String topicId = "verify-email";
 
-            publishEmail(projectId, topicId, userResponse.getUserName(), userResponse.getId());
+            String uuid = generateUUID();
+
+            userResponse.setEmailVerificationToken(uuid);
+            userRepository.save(userResponse);
+
+            publishEmail(projectId, topicId, userResponse.getUserName(), uuid);
 
             return mapToDto(userResponse);
     }
@@ -88,6 +91,10 @@ public class UserServiceImpl implements UserService {
             String messageId = messageIdFuture.get();
             System.out.println("Published message ID: " + messageId);
         }
+        catch (Exception e)
+        {
+            System.out.println("Error in publishing message: " + e.getMessage());
+        }
         finally {
             if (publisher != null) {
                 // When finished with the publisher, shutdown to free up resources.
@@ -95,6 +102,11 @@ public class UserServiceImpl implements UserService {
                 publisher.awaitTermination(1, TimeUnit.MINUTES);
             }
         }
+    }
+
+    public static String generateUUID() {
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 
     private boolean validateForEmptyAndNullValues(User user) {
@@ -269,22 +281,22 @@ public class UserServiceImpl implements UserService {
             if(!user.isVerified())
             {
                 // Get the emailSentTime from user
-                Date emailSentTimeLocal = user.getEmailSentTime();
+                Date emailExpiryTimeLoc = user.getEmailExpiryTime();
 
                 // Convert emailSentTime from UTC to Instant
-                Instant emailSentTime = emailSentTimeLocal.toInstant();
+                Instant emailExpiryTime = emailExpiryTimeLoc.toInstant();
 
                 // Get the current time in UTC
                 Instant currentTime = Instant.now();
 
                 // Calculate the duration between email sent time and current time
-                Duration duration = Duration.between(emailSentTime, currentTime);
+                Duration duration = Duration.between(emailExpiryTime, currentTime);
 
-                System.out.println(emailSentTime);
+                System.out.println(emailExpiryTime);
                 System.out.println(currentTime);
+                System.out.println(duration.toSeconds());
 
-                // Check if the duration is less than 2 minutes
-                if (user.getId().equals(uuid) && duration.toMinutes() < 2) {
+                if (user.getEmailVerificationToken().equals(uuid) && duration.toSeconds() < 0) {
                     user.setVerified(true);
                     userRepository.save(user);
                     return "User Verified Successfully";

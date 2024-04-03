@@ -60,7 +60,9 @@ public class User {
     @Column(name = "is_verified")
     private boolean isVerified;
 
-    @Column(name = "email_sent_time")
-    @CreationTimestamp
-    private Date emailSentTime;
+    @Column(name = "email_expiry_time")
+    private Date emailExpiryTime;
+
+    @Column(name = "email_verification_token")
+    private String emailVerificationToken;
 }
