@@ -53,4 +53,9 @@ build {
   provisioner "shell" {
     script = "./scripts/install_ops_agent.sh"
   }
+
+  post-processor "manifest" {
+    output     = "manifest.json"
+    strip_path = true
+  }
 }
