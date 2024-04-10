@@ -9,7 +9,7 @@ on:
 
 jobs:
   if_merged:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == false
     name: Build Jar and Create Custom Image
     runs-on: ubuntu-latest
     env:
