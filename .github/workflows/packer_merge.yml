@@ -2,10 +2,10 @@ name: Packer CI - Build Custom Image
 
 on:
   pull_request:
-    branches:
-      - 'main'
-    types:
-      - closed
+#    branches:
+#      - 'main'
+#    types:
+#      - closed
 
 jobs:
   if_merged:
