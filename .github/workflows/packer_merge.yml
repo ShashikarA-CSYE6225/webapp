@@ -66,3 +66,51 @@ jobs:
           packer fmt -check .
           packer validate .
           packer build .
+
+      - id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v2'
+        with:
+         secrets: |-
+           db_name:projects/882091279014/secrets/db_name/versions/1
+           db_ip:projects/882091279014/secrets/db_ip/versions/1
+           db_password:projects/882091279014/secrets/db_password/versions/1
+           db_username:projects/882091279014/secrets/db_username/versions/1
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Use gcloud CLI'
+        run: |
+          gcloud compute instance-templates create instance-template-1 \
+            --machine-type=n2-standard-2 \
+            --instance-template-region=us-east1 \
+            --create-disk=image=projects/csye6225-dev-414805/global/images/centos-webapp-1712124237,size=100,type=pd-balanced,auto-delete=yes,boot=true \
+            --network=projects/csye6225-dev-414805/global/networks/csye6225-vpc \
+            --subnet=projects/csye6225-dev-414805/regions/us-east1/subnetworks/webapp \
+            --metadata=startup-script="echo 'DATABASE_URL=jdbc:mysql://${{steps.secrets.outputs.db_ip}}:3306/${{steps.secrets.outputs.db_name}}?createDatabaseIfNotExist=true' > .env && \
+            echo 'DATABASE_USERNAME=${{steps.secrets.outputs.db_username}}' >> .env && \
+            echo 'DATABASE_PASSWORD=${{steps.secrets.outputs.db_password}}' >> .env && \
+            sudo mv .env /opt/ && \
+            sudo chown csye6225:csye6225 /opt/.env && \
+            sudo setenforce 0 && \
+            sudo systemctl daemon-reload && \
+            sudo systemctl restart csye6225.service" \
+            --service-account=custom-service-account@csye6225-dev-414805.iam.gserviceaccount.com \
+            --tags=web
+
+
+      - name: 'Link the managed instance group to use the new instance template'
+        run: | 
+          gcloud compute instance-groups managed set-instance-template \
+          projects/csye6225-dev-414805/regions/us-east1/instanceGroupManagers/appserver-igm \
+          --template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/instance-template-1
+
+      - name: 'Start Rolling Update to update the grp manager to use the new instance template'
+        run: |
+          gcloud compute instance-groups managed rolling-action start-update projects/csye6225-dev-414805/regions/us-east1/instanceGroupManagers/appserver-igm \
+          --version=template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/instance-template-1
+
+      - name: 'Check if the rolling updates are done by checking version target reached flag'
+        run: |
+          gcloud compute instance-groups managed wait-until projects/csye6225-dev-414805/regions/us-east1/instanceGroupManagers/appserver-igm \
+          --version-target-reached \
