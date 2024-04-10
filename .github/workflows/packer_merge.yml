@@ -74,6 +74,14 @@ jobs:
           packer validate .
           packer build .
 
+      - id: extract-image-name
+        run: |
+          jq -r '.builds[-1].artifact_id' packer-manifest.json > image-name.txt
+
+      - name: Read image name from file
+        id: read-image-name
+        run: echo "::set-output name=image_name::$(cat image-name.txt)"
+
       - id: 'secrets'
         uses: 'google-github-actions/get-secretmanager-secrets@v2'
         with:
@@ -91,7 +99,7 @@ jobs:
           gcloud compute instance-templates create $INSTANCE_TEMPLATE \
             --machine-type=$MACHINE_TYPE \
             --instance-template-region=$REGION \
-            --create-disk=image=projects/csye6225-dev-414805/global/images/centos-webapp-1712124237,size=100,type=pd-balanced,auto-delete=yes,boot=true \
+            --create-disk=image=${{ steps.read-image-name.outputs.image_name }},size=100,type=pd-balanced,auto-delete=yes,boot=true \
             --network=projects/csye6225-dev-414805/global/networks/$GCLOUD_NETWORK \
             --subnet=projects/csye6225-dev-414805/regions/us-east1/subnetworks/$SUBNET \
             --metadata=startup-script="echo 'DATABASE_URL=jdbc:mysql://${{steps.secrets.outputs.db_ip}}:3306/${{steps.secrets.outputs.db_name}}?createDatabaseIfNotExist=true' > .env && \
