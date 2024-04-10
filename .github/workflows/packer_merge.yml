@@ -104,7 +104,7 @@ jobs:
           gcloud compute instance-templates create $INSTANCE_TEMPLATE-$RANDOM_STRING \
             --machine-type=$MACHINE_TYPE \
             --instance-template-region=$REGION \
-            --create-disk=image=projects/csye6225-dev-414805/global/images/$VM_IMAGE_NAME,size=$VM_DISK_SIZE,type=$VM_DISK_TYPE,auto-delete=yes,boot=true, kms-key=${{steps.secrets.outputs.vm-kms-encryption}} \
+            --create-disk=image=projects/csye6225-dev-414805/global/images/$VM_IMAGE_NAME,size=$VM_DISK_SIZE,type=$VM_DISK_TYPE,auto-delete=yes,boot=true,kms-key=${{steps.secrets.outputs.vm-kms-encryption}} \
             --network=$GCLOUD_NETWORK \
             --subnet=$SUBNET \
             --metadata=startup-script="echo 'DATABASE_URL=jdbc:mysql://${{steps.secrets.outputs.db_ip}}:3306/${{steps.secrets.outputs.db_name}}?createDatabaseIfNotExist=true' > .env && \
