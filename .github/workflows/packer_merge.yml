@@ -108,6 +108,7 @@ jobs:
       - name: 'Start Rolling Update to update the grp manager to use the new instance template'
         run: |
           gcloud compute instance-groups managed rolling-action start-update projects/csye6225-dev-414805/regions/us-east1/instanceGroupManagers/appserver-igm \
+          --type=opportunistic
           --version=template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/instance-template-1
 
       - name: 'Check if the rolling updates are done by checking version target reached flag'
