@@ -71,10 +71,10 @@ jobs:
         uses: 'google-github-actions/get-secretmanager-secrets@v2'
         with:
          secrets: |-
-           db_name:projects/882091279014/secrets/db_name/versions/1
-           db_ip:projects/882091279014/secrets/db_ip/versions/1
-           db_password:projects/882091279014/secrets/db_password/versions/1
-           db_username:projects/882091279014/secrets/db_username/versions/1
+           db_name:projects/882091279014/secrets/db_name
+           db_ip:projects/882091279014/secrets/db_ip
+           db_password:projects/882091279014/secrets/db_password
+           db_username:projects/882091279014/secrets/db_username
 
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
