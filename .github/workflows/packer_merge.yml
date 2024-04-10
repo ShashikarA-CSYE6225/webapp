@@ -31,7 +31,7 @@ jobs:
       PKR_VAR_service_account_json: ${{secrets.service_account_json}}
       MACHINE_TYPE: ${{secrets.MACHINE_TYPE}}
       REGION: ${{secrets.REGION}}
-      NETWORK: ${{secrets.NETWORK}}
+      GCLOUD_NETWORK: ${{secrets.GCLOUD_NETWORK}}
       SUBNET: ${{secrets.SUBNET}}
       VM_INSTANCE_SERVICE_ACCOUNT: ${{secrets.VM_INSTANCE_SERVICE_ACCOUNT}}
       INSTANCE_GRP_MANAGER: ${{secrets.INSTANCE_GRP_MANAGER}}
@@ -92,8 +92,8 @@ jobs:
             --machine-type=$MACHINE_TYPE \
             --instance-template-region=$REGION \
             --create-disk=image=projects/csye6225-dev-414805/global/images/centos-webapp-1712124237,size=100,type=pd-balanced,auto-delete=yes,boot=true \
-            --network=$NETWORK \
-            --subnet=$SUBNET \
+            --network=projects/csye6225-dev-414805/global/networks/$GCLOUD_NETWORK \
+            --subnet=projects/csye6225-dev-414805/regions/us-east1/subnetworks/$SUBNET \
             --metadata=startup-script="echo 'DATABASE_URL=jdbc:mysql://${{steps.secrets.outputs.db_ip}}:3306/${{steps.secrets.outputs.db_name}}?createDatabaseIfNotExist=true' > .env && \
             echo 'DATABASE_USERNAME=${{steps.secrets.outputs.db_username}}' >> .env && \
             echo 'DATABASE_PASSWORD=${{steps.secrets.outputs.db_password}}' >> .env && \
