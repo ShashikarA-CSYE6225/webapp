@@ -29,6 +29,13 @@ jobs:
       PKR_VAR_ssh_timeout: ${{secrets.ssh_timeout}}
       PKR_VAR_service_account_email: ${{secrets.service_account_email}}
       PKR_VAR_service_account_json: ${{secrets.service_account_json}}
+      MACHINE_TYPE: ${{secrets.MACHINE_TYPE}}
+      REGION: ${{secrets.REGION}}
+      NETWORK: ${{secrets.NETWORK}}
+      SUBNET: ${{secrets.SUBNET}}
+      VM_INSTANCE_SERVICE_ACCOUNT: ${{secrets.VM_INSTANCE_SERVICE_ACCOUNT}}
+      INSTANCE_GRP_MANAGER: ${{secrets.INSTANCE_GRP_MANAGER}}
+      INSTANCE_TEMPLATE: ${{secrets.INSTANCE_TEMPLATE}}
 
 
     steps:
@@ -81,12 +88,12 @@ jobs:
 
       - name: 'Use gcloud CLI'
         run: |
-          gcloud compute instance-templates create instance-template-1 \
-            --machine-type=n2-standard-2 \
-            --instance-template-region=us-east1 \
+          gcloud compute instance-templates create $INSTANCE_TEMPLATE \
+            --machine-type=$MACHINE_TYPE \
+            --instance-template-region=$REGION \
             --create-disk=image=projects/csye6225-dev-414805/global/images/centos-webapp-1712124237,size=100,type=pd-balanced,auto-delete=yes,boot=true \
-            --network=projects/csye6225-dev-414805/global/networks/csye6225-vpc \
-            --subnet=projects/csye6225-dev-414805/regions/us-east1/subnetworks/webapp \
+            --network=$NETWORK \
+            --subnet=$SUBNET \
             --metadata=startup-script="echo 'DATABASE_URL=jdbc:mysql://${{steps.secrets.outputs.db_ip}}:3306/${{steps.secrets.outputs.db_name}}?createDatabaseIfNotExist=true' > .env && \
             echo 'DATABASE_USERNAME=${{steps.secrets.outputs.db_username}}' >> .env && \
             echo 'DATABASE_PASSWORD=${{steps.secrets.outputs.db_password}}' >> .env && \
@@ -95,23 +102,23 @@ jobs:
             sudo setenforce 0 && \
             sudo systemctl daemon-reload && \
             sudo systemctl restart csye6225.service" \
-            --service-account=custom-service-account@csye6225-dev-414805.iam.gserviceaccount.com \
+            --service-account=$VM_INSTANCE_SERVICE_ACCOUNT \
             --tags=web
 
 
       - name: 'Link the managed instance group to use the new instance template'
         run: | 
           gcloud compute instance-groups managed set-instance-template \
-          projects/csye6225-dev-414805/regions/us-east1/instanceGroupManagers/appserver-igm \
-          --template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/instance-template-1
+          $INSTANCE_GRP_MANAGER \
+          --template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/$INSTANCE_TEMPLATE
 
       - name: 'Start Rolling Update to update the grp manager to use the new instance template'
         run: |
-          gcloud compute instance-groups managed rolling-action start-update projects/csye6225-dev-414805/regions/us-east1/instanceGroupManagers/appserver-igm \
+          gcloud compute instance-groups managed rolling-action start-update $INSTANCE_GRP_MANAGER \
           --type="opportunistic" \
-          --version=template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/instance-template-1
+          --version=template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/$INSTANCE_TEMPLATE
 
       - name: 'Check if the rolling updates are done by checking version target reached flag'
         run: |
-          gcloud compute instance-groups managed wait-until projects/csye6225-dev-414805/regions/us-east1/instanceGroupManagers/appserver-igm \
+          gcloud compute instance-groups managed wait-until $INSTANCE_GRP_MANAGER \
           --version-target-reached \
