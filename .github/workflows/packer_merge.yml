@@ -36,6 +36,9 @@ jobs:
       VM_INSTANCE_SERVICE_ACCOUNT: ${{secrets.VM_INSTANCE_SERVICE_ACCOUNT}}
       INSTANCE_GRP_MANAGER: ${{secrets.INSTANCE_GRP_MANAGER}}
       INSTANCE_TEMPLATE: ${{secrets.INSTANCE_TEMPLATE}}
+      ROLLING_ACTION_TYPE: ${{secrets.ROLLING_ACTION_TYPE}}
+      VM_DISK_SIZE: ${{secrets.VM_DISK_SIZE}}
+      VM_DISK_TYPE: ${{secrets.VM_DISK_TYPE}}
 
 
     steps:
@@ -72,15 +75,16 @@ jobs:
           packer init .
           packer fmt -check .
           packer validate .
-          packer build .
-
-      - id: extract-image-name
+          
+      - name: Run packer build
+        working-directory: ./packer
         run: |
-          jq -r '.builds[-1].artifact_id' packer-manifest.json > image-name.txt
+          output=$(packer build .)
+          VM_IMAGE_NAME=$(echo $output | grep -Eo 'A disk image was created in the .+ project: .+' | sed -E 's/A disk image was created in the .+ project: (.+)/\1/') && echo "VM_IMAGE_NAME=$VM_IMAGE_NAME" >> "$GITHUB_ENV"
 
-      - name: Read image name from file
-        id: read-image-name
-        run: echo "::set-output name=image_name::$(cat image-name.txt)"
+      - name: Generate random string
+        id: random-string
+        run: echo "RANDOM_STRING=$(uuidgen | tr -d '-')" >> $GITHUB_ENV
 
       - id: 'secrets'
         uses: 'google-github-actions/get-secretmanager-secrets@v2'
@@ -96,12 +100,12 @@ jobs:
 
       - name: 'Use gcloud CLI'
         run: |
-          gcloud compute instance-templates create $INSTANCE_TEMPLATE \
+          gcloud compute instance-templates create $INSTANCE_TEMPLATE-$RANDOM_STRING \
             --machine-type=$MACHINE_TYPE \
             --instance-template-region=$REGION \
-            --create-disk=image=${{ steps.read-image-name.outputs.image_name }},size=100,type=pd-balanced,auto-delete=yes,boot=true \
-            --network=projects/csye6225-dev-414805/global/networks/$GCLOUD_NETWORK \
-            --subnet=projects/csye6225-dev-414805/regions/us-east1/subnetworks/$SUBNET \
+            --create-disk=image=projects/csye6225-dev-414805/global/images/$VM_IMAGE_NAME,size=$VM_DISK_SIZE,type=$VM_DISK_TYPE,auto-delete=yes,boot=true \
+            --network=$GCLOUD_NETWORK \
+            --subnet=$SUBNET \
             --metadata=startup-script="echo 'DATABASE_URL=jdbc:mysql://${{steps.secrets.outputs.db_ip}}:3306/${{steps.secrets.outputs.db_name}}?createDatabaseIfNotExist=true' > .env && \
             echo 'DATABASE_USERNAME=${{steps.secrets.outputs.db_username}}' >> .env && \
             echo 'DATABASE_PASSWORD=${{steps.secrets.outputs.db_password}}' >> .env && \
@@ -118,15 +122,19 @@ jobs:
         run: | 
           gcloud compute instance-groups managed set-instance-template \
           $INSTANCE_GRP_MANAGER \
-          --template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/$INSTANCE_TEMPLATE
+          --template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/$INSTANCE_TEMPLATE-$RANDOM_STRING
 
       - name: 'Start Rolling Update to update the grp manager to use the new instance template'
         run: |
           gcloud compute instance-groups managed rolling-action start-update $INSTANCE_GRP_MANAGER \
-          --type="opportunistic" \
-          --version=template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/$INSTANCE_TEMPLATE
+          --type=$ROLLING_ACTION_TYPE \
+          --version=template=projects/csye6225-dev-414805/regions/us-east1/instanceTemplates/$INSTANCE_TEMPLATE-$RANDOM_STRING
 
       - name: 'Check if the rolling updates are done by checking version target reached flag'
         run: |
           gcloud compute instance-groups managed wait-until $INSTANCE_GRP_MANAGER \
           --version-target-reached \
+
+      - name: 'Describing the instance grp manager status'
+        run: |
+          gcloud compute instance-groups managed describe $INSTANCE_GRP_MANAGER \
