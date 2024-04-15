@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.Logger;
 
 @RestController
-@RequestMapping("/v1/user")
+@RequestMapping("/v2/user")
 @Slf4j
 public class UserController {
 
